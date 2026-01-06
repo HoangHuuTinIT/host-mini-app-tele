@@ -37,6 +37,7 @@ android {
 
 dependencies {
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("androidx.biometric:biometric:1.1.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

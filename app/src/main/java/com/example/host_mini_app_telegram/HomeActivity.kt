@@ -28,14 +28,13 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    // Trong HomeActivity.kt
     private fun openMiniApp() {
         val intent = Intent(this, MainActivity::class.java)
-
-        // Có thể truyền thêm data nếu cần
         intent.putExtra("user_id", "999999")
         intent.putExtra("first_name", "Hoàng")
         intent.putExtra("username", "Hoàng Hữu Tín")
-
+        intent.putExtra("start_param", "test123") // Thêm dòng này
         startActivity(intent)
     }
 }
