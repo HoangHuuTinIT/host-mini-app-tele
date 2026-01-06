@@ -143,9 +143,9 @@ class MainActivity : AppCompatActivity() {
         }
         webView.addJavascriptInterface(WebAppInterface(this), "Android")
 
-        val userId = "999999"
-        val firstName = "Hoàng"
-        val username = "Hoàng Hữu Tín"
+        val userId = intent.getStringExtra("user_id") ?: "999999"
+        val firstName = intent.getStringExtra("first_name") ?: "Hoàng"
+        val username = intent.getStringExtra("username") ?: "Hoàng Hữu Tín"
 
         val assetUrl = "file:///android_asset/dist/index.html"
         val fullUrl = "$assetUrl?user_id=$userId&first_name=$firstName&username=$username"
