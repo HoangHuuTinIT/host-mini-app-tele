@@ -361,49 +361,60 @@ class MainActivity : AppCompatActivity() {
         val anchor = findViewById<Toolbar>(R.id.toolbar)
         val popupMenu = PopupMenu(this, anchor)
 
-        // === BUTTONS ===
-        popupMenu.menu.add(0, 1, 0, "🚀 Show Main Button")
-        popupMenu.menu.add(0, 2, 0, "🥈 Show Secondary Button")
-        popupMenu.menu.add(0, 3, 0, "⬅️ Show Back Button")
-        popupMenu.menu.add(0, 4, 0, "⚙️ Show Settings Button")
+        // === 1. BUTTONS - Các nút bấm ===
+        popupMenu.menu.add(0, 1, 0, "🚀 Hiện Nút Chính")
+        popupMenu.menu.add(0, 2, 0, "🥈 Hiện Nút Phụ")
+        popupMenu.menu.add(0, 3, 0, "⬅️ Hiện Nút Back")
+        popupMenu.menu.add(0, 4, 0, "⚙️ Hiện Nút Settings")
 
-        // === UI CONTROL ===
-        popupMenu.menu.add(1, 10, 0, "🖥️ Request Fullscreen")
-        popupMenu.menu.add(1, 11, 0, "📐 Expand Viewport")
-        popupMenu.menu.add(1, 12, 0, "🎨 Set Header Color (Red)")
-        popupMenu.menu.add(1, 13, 0, "🎨 Set Bottom Bar Color (Blue)")
-        popupMenu.menu.add(1, 14, 0, "👆 Disable Swipe Close")
-        popupMenu.menu.add(1, 15, 0, "🚪 Enable Close Confirmation")
+        // === 2. UI CONTROL - Điều khiển giao diện ===
+        popupMenu.menu.add(1, 10, 0, "🎨 Header Đỏ")
+        popupMenu.menu.add(1, 11, 0, "🎨 Bottom Bar Xanh")
+        popupMenu.menu.add(1, 12, 0, "📐 Expand Full Screen")
+        popupMenu.menu.add(1, 13, 0, "🖥️ Vào Fullscreen")
+        popupMenu.menu.add(1, 14, 0, "👆 Tắt Swipe to Close")
+        popupMenu.menu.add(1, 15, 0, "🚪 Bật Xác nhận đóng")
 
-        // === FEEDBACK ===
-        popupMenu.menu.add(2, 20, 0, "📳 Haptic Impact Light")
-        popupMenu.menu.add(2, 21, 0, "📳 Haptic Impact Heavy")
-        popupMenu.menu.add(2, 22, 0, "✅ Notification Success")
-        popupMenu.menu.add(2, 23, 0, "❌ Notification Error")
-        popupMenu.menu.add(2, 24, 0, "💬 Show Popup")
+        // === 3. FEEDBACK - Phản hồi ===
+        popupMenu.menu.add(2, 20, 0, "📳 Rung Nhẹ")
+        popupMenu.menu.add(2, 21, 0, "📳 Rung Mạnh")
+        popupMenu.menu.add(2, 22, 0, "✅ Rung Success")
+        popupMenu.menu.add(2, 23, 0, "❌ Rung Error")
+        popupMenu.menu.add(2, 24, 0, "💬 Hiện Popup Chuẩn")
 
-        // === ACTIONS ===
-        popupMenu.menu.add(3, 30, 0, "📷 Open QR Scanner")
-        popupMenu.menu.add(3, 31, 0, "🔗 Open Link (Google)")
-        popupMenu.menu.add(3, 32, 0, "💰 Open Invoice")
-        popupMenu.menu.add(3, 33, 0, "📢 Share Text")
-        popupMenu.menu.add(3, 34, 0, "📖 Share Story")
-        popupMenu.menu.add(3, 35, 0, "📥 Download File")
-        popupMenu.menu.add(3, 36, 0, "🖼️ Open Media Preview")
+        // === 4. ACTIONS - Hành động ===
+        popupMenu.menu.add(3, 30, 0, "📷 Quét QRCode")
+        popupMenu.menu.add(3, 31, 0, "💰 Mở Invoice")
+        popupMenu.menu.add(3, 32, 0, "📢 Share App")
+        popupMenu.menu.add(3, 33, 0, "📖 Share to Story")
+        popupMenu.menu.add(3, 34, 0, "📥 Download")
+        popupMenu.menu.add(3, 35, 0, "🖼️ Xem Media")
+        popupMenu.menu.add(3, 36, 0, "🔗 Mở Link")
+        popupMenu.menu.add(3, 37, 0, "📤 Gửi Data")
+        popupMenu.menu.add(3, 38, 0, "🔍 Mở Inline Query")
 
-        // === PERMISSIONS ===
-        popupMenu.menu.add(4, 40, 0, "✍️ Request Write Access")
-        popupMenu.menu.add(4, 41, 0, "📞 Request Contact")
-        popupMenu.menu.add(4, 42, 0, "📋 Read Clipboard")
+        // === 5. PERMISSIONS - Quyền truy cập ===
+        popupMenu.menu.add(4, 40, 0, "✍️ Yêu cầu quyền gửi tin")
+        popupMenu.menu.add(4, 41, 0, "📞 Yêu cầu số điện thoại")
+        popupMenu.menu.add(4, 42, 0, "📋 Đọc Clipboard")
 
-        // === OTHER ===
-        popupMenu.menu.add(5, 50, 0, "🏠 Add to Home Screen")
-        popupMenu.menu.add(5, 51, 0, "😀 Set Emoji Status")
-        popupMenu.menu.add(5, 52, 0, "🔐 Biometric Auth")
-        popupMenu.menu.add(5, 53, 0, "📍 Get Location")
-        popupMenu.menu.add(5, 54, 0, "📱 Start Accelerometer")
-        popupMenu.menu.add(5, 55, 0, "🔍 Switch Inline Query")
-        popupMenu.menu.add(5, 56, 0, "📤 Send Data")
+        // === 6. STORAGE - Lưu trữ ===
+        // (Cloud Storage chỉ test qua UI)
+
+        // === 7. SENSORS - Cảm biến ===
+        popupMenu.menu.add(5, 50, 0, "📱 Accelerometer Start")
+        popupMenu.menu.add(5, 51, 0, "🌀 Gyroscope Start")
+        popupMenu.menu.add(5, 52, 0, "🧭 Device Orientation Start")
+
+        // === 8. LOCATION - Vị trí ===
+        popupMenu.menu.add(6, 60, 0, "📍 Lấy vị trí")
+
+        // === 9. BIOMETRIC - Sinh trắc học ===
+        popupMenu.menu.add(7, 70, 0, "🔐 Xác thực")
+
+        // === 10. OTHERS - Khác ===
+        popupMenu.menu.add(8, 80, 0, "😀 Đặt Emoji Status")
+        popupMenu.menu.add(8, 81, 0, "🏠 Thêm vào Home Screen")
 
         popupMenu.setOnMenuItemClickListener { menuItem ->
             handleSDKMenuClick(menuItem.itemId)
@@ -415,49 +426,57 @@ class MainActivity : AppCompatActivity() {
     // Xử lý click từng SDK - GỌI TRỰC TIẾP window.Android
     private fun handleSDKMenuClick(itemId: Int) {
         val js = when (itemId) {
-            // BUTTONS - Gọi trực tiếp Android interface
+            // === 1. BUTTONS ===
             1 -> "if(window.Android) { window.Android.setMainButtonVisible(true); window.Android.setMainButtonText('Main Button'); }"
             2 -> "if(window.Android) { window.Android.setSecondaryButtonVisible(true); window.Android.setSecondaryButtonText('Secondary'); }"
             3 -> "if(window.Android) { window.Android.setBackButtonVisible(true); }"
             4 -> "if(window.Android) { window.Android.setSettingsButtonVisible(true); }"
 
-            // UI CONTROL
-            10 -> "if(window.Android) { window.Android.setFullscreen(true); }"
-            11 -> "if(window.Android) { window.Android.expandViewport(); }"
-            12 -> "if(window.Android) { window.Android.setHeaderColor('#ff0000'); }"
-            13 -> "if(window.Android) { window.Android.setBottomBarColor('#3390ec'); }"
+            // === 2. UI CONTROL ===
+            10 -> "if(window.Android) { window.Android.setHeaderColor('#ff0000'); }"
+            11 -> "if(window.Android) { window.Android.setBottomBarColor('#3390ec'); }"
+            12 -> "if(window.Android) { window.Android.expandViewport(); }"
+            13 -> "if(window.Android) { window.Android.setFullscreen(true); }"
             14 -> "if(window.Android) { window.Android.setSwipeEnabled(false); }"
             15 -> "if(window.Android) { window.Android.setClosingConfirmation(true); }"
 
-            // FEEDBACK
+            // === 3. FEEDBACK ===
             20 -> "if(window.Android) { window.Android.hapticFeedback('impact', 'light'); }"
             21 -> "if(window.Android) { window.Android.hapticFeedback('impact', 'heavy'); }"
             22 -> "if(window.Android) { window.Android.hapticFeedback('notification', 'success'); }"
             23 -> "if(window.Android) { window.Android.hapticFeedback('notification', 'error'); }"
             24 -> "if(window.Android) { window.Android.openPopup('Test', 'From Android Menu', '[{\"type\":\"ok\",\"text\":\"OK\"}]'); }"
 
-            // ACTIONS
+            // === 4. ACTIONS ===
             30 -> "if(window.Android) { window.Android.scanQrCode(); }"
-            31 -> "if(window.Android) { window.Android.openLink('https://google.com'); }"
-            32 -> "if(window.Android) { window.Android.openInvoice('test-slug'); }"
-            33 -> "if(window.Android) { window.Android.shareText('Hello from SDK Menu!'); }"
-            34 -> "if(window.Android) { window.Android.shareStory('https://picsum.photos/800/600', 'From Menu', '', ''); }"
-            35 -> "if(window.Android) { window.Android.downloadFile('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'test.pdf'); }"
-            36 -> "if(window.Android) { window.Android.openMediaPreview('https://picsum.photos/800/600', 'photo'); }"
+            31 -> "if(window.Android) { window.Android.openInvoice('test-slug'); }"
+            32 -> "if(window.Android) { window.Android.shareText('Hello from SDK Menu!'); }"
+            33 -> "if(window.Android) { window.Android.shareStory('https://picsum.photos/800/600', 'From Menu', '', ''); }"
+            34 -> "if(window.Android) { window.Android.downloadFile('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'test.pdf'); }"
+            35 -> "if(window.Android) { window.Android.openMediaPreview('https://picsum.photos/800/600', 'photo'); }"
+            36 -> "if(window.Android) { window.Android.openLink('https://google.com'); }"
+            37 -> "if(window.Android) { window.Android.sendData('{\"from\":\"menu\"}'); }"
+            38 -> "if(window.Android) { window.Android.switchInlineQuery('test query', '[\"users\",\"groups\"]'); }"
 
-            // PERMISSIONS
+            // === 5. PERMISSIONS ===
             40 -> "if(window.Android) { window.Android.requestWriteAccess(); }"
             41 -> "if(window.Android) { window.Android.requestContact(); }"
             42 -> "if(window.Android) { window.Android.readTextFromClipboard(); }"
 
-            // OTHER
-            50 -> "if(window.Android) { window.Android.addToHomeScreen(); }"
-            51 -> "if(window.Android) { window.Android.setEmojiStatus('5368324170671202286', 3600); }"
-            52 -> "if(window.Android) { window.Android.biometricAuthenticate('From Menu'); }"
-            53 -> "if(window.Android) { window.Android.getCurrentLocation(); }"
-            54 -> "if(window.Android) { window.Android.startAccelerometer('ui'); }"
-            55 -> "if(window.Android) { window.Android.switchInlineQuery('test query', '[\"users\",\"groups\"]'); }"
-            56 -> "if(window.Android) { window.Android.sendData('{\"from\":\"menu\"}'); }"
+            // === 7. SENSORS ===
+            50 -> "if(window.Android) { window.Android.startAccelerometer('ui'); }"
+            51 -> "if(window.Android) { window.Android.startGyroscope('ui'); }"
+            52 -> "if(window.Android) { window.Android.startDeviceOrientation('ui', false); }"
+
+            // === 8. LOCATION ===
+            60 -> "if(window.Android) { window.Android.getCurrentLocation(); }"
+
+            // === 9. BIOMETRIC ===
+            70 -> "if(window.Android) { window.Android.biometricAuthenticate('From Menu'); }"
+
+            // === 10. OTHERS ===
+            80 -> "if(window.Android) { window.Android.setEmojiStatus('5368324170671202286', 3600); }"
+            81 -> "if(window.Android) { window.Android.addToHomeScreen(); }"
 
             else -> null
         }
