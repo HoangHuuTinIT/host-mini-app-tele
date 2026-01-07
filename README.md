@@ -3,7 +3,6 @@
 ## Clone Repository
 
 ```bash
-# Clone dự án về máy
 git clone https://github.com/HoangHuuTinIT/host-mini-app-tele.git
 ```
 
@@ -19,15 +18,13 @@ git clone https://github.com/HoangHuuTinIT/host-mini-app-tele.git
 6. Chạy app
 
 ## Ghi chú
-### Thông tin mini-app được tích hợp vào app android ở repo này
+### Thông tin mini-app được tích hợp vào app android ở repo này tham khảo tại:
 
 ```bash
-# Tham khảo tại
 https://github.com/HoangHuuTinIT/mini-app-telegram-2
 ```
-### Thông tin cách tích hợp và các SDK được sử dụng
+### Thông tin cách tích hợp và các SDK được sử dụng, tham khảo tại:
 ```bash
-# Tham khảo tại
 https://docs.google.com/document/d/1eVwvmflke6pUQNuvSoCPXP8kMhuP7_Poy0BolJ_SzHA/edit?tab=t.0
 ```
 
