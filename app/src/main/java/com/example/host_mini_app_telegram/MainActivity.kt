@@ -363,58 +363,88 @@ class MainActivity : AppCompatActivity() {
 
         // === 1. BUTTONS - Các nút bấm ===
         popupMenu.menu.add(0, 1, 0, "🚀 Hiện Nút Chính")
-        popupMenu.menu.add(0, 2, 0, "🥈 Hiện Nút Phụ")
-        popupMenu.menu.add(0, 3, 0, "⬅️ Hiện Nút Back")
-        popupMenu.menu.add(0, 4, 0, "⚙️ Hiện Nút Settings")
+        popupMenu.menu.add(0, 2, 0, "🚀 Ẩn Nút Chính")
+        popupMenu.menu.add(0, 3, 0, "📝 Đổi tên: Thanh Toán")
+        popupMenu.menu.add(0, 4, 0, "🎨 Đổi màu Hồng")
+        popupMenu.menu.add(0, 5, 0, "✅ Enable")
+        popupMenu.menu.add(0, 6, 0, "🚫 Disable")
+        popupMenu.menu.add(0, 7, 0, "⏳ Loading")
+        popupMenu.menu.add(0, 8, 0, "✓ Done")
+        popupMenu.menu.add(0, 9, 0, "🥈 Hiện Nút Phụ")
+        popupMenu.menu.add(0, 10, 0, "🥈 Ẩn Nút Phụ")
+        popupMenu.menu.add(0, 11, 0, "⬅️ Hiện Nút Back")
+        popupMenu.menu.add(0, 12, 0, "⬅️ Ẩn Nút Back")
+        popupMenu.menu.add(0, 13, 0, "⚙️ Hiện Nút Settings")
+        popupMenu.menu.add(0, 14, 0, "⚙️ Ẩn Nút Settings")
 
         // === 2. UI CONTROL - Điều khiển giao diện ===
-        popupMenu.menu.add(1, 10, 0, "🎨 Header Đỏ")
-        popupMenu.menu.add(1, 11, 0, "🎨 Bottom Bar Xanh")
-        popupMenu.menu.add(1, 12, 0, "📐 Expand Full Screen")
-        popupMenu.menu.add(1, 13, 0, "🖥️ Vào Fullscreen")
-        popupMenu.menu.add(1, 14, 0, "👆 Tắt Swipe to Close")
-        popupMenu.menu.add(1, 15, 0, "🚪 Bật Xác nhận đóng")
+        popupMenu.menu.add(1, 20, 0, "🎨 Header Đỏ")
+        popupMenu.menu.add(1, 21, 0, "🎨 Header Xanh")
+        popupMenu.menu.add(1, 22, 0, "🎨 Header Theme")
+        popupMenu.menu.add(1, 23, 0, "🎨 Bottom Bar Xanh Dương")
+        popupMenu.menu.add(1, 24, 0, "🎨 Bottom Bar Cam")
+        popupMenu.menu.add(1, 112, 0, "🎨 Bottom Bar Xanh Lá")
+        popupMenu.menu.add(1, 113, 0, "🎨 Bottom Bar Tím")
+        popupMenu.menu.add(1, 25, 0, "📐 Expand Full Screen")
+        popupMenu.menu.add(1, 26, 0, "🖥️ Vào Fullscreen")
+        popupMenu.menu.add(1, 27, 0, "🖥️ Thoát Fullscreen")
+        popupMenu.menu.add(1, 28, 0, "👆 Tắt Swipe to Close")
+        popupMenu.menu.add(1, 29, 0, "👆 Bật Swipe to Close")
+        popupMenu.menu.add(1, 30, 0, "🔒 Bật Xác nhận đóng")
+        popupMenu.menu.add(1, 31, 0, "🔓 Tắt Xác nhận đóng")
 
         // === 3. FEEDBACK - Phản hồi ===
-        popupMenu.menu.add(2, 20, 0, "📳 Rung Nhẹ")
-        popupMenu.menu.add(2, 21, 0, "📳 Rung Mạnh")
-        popupMenu.menu.add(2, 22, 0, "✅ Rung Success")
-        popupMenu.menu.add(2, 23, 0, "❌ Rung Error")
-        popupMenu.menu.add(2, 24, 0, "💬 Hiện Popup Chuẩn")
+        popupMenu.menu.add(2, 40, 0, "💬 Toast Hello")
+        popupMenu.menu.add(2, 41, 0, "📳 Rung Nhẹ")
+        popupMenu.menu.add(2, 42, 0, "📳 Rung Mạnh")
+        popupMenu.menu.add(2, 43, 0, "✅ Rung Success")
+        popupMenu.menu.add(2, 44, 0, "❌ Rung Error")
+        popupMenu.menu.add(2, 45, 0, "👆 Rung Selection")
+        popupMenu.menu.add(2, 46, 0, "💬 Hiện Popup Chuẩn")
 
         // === 4. ACTIONS - Hành động ===
-        popupMenu.menu.add(3, 30, 0, "📷 Quét QRCode")
-        popupMenu.menu.add(3, 31, 0, "💰 Mở Invoice")
-        popupMenu.menu.add(3, 32, 0, "📢 Share App")
-        popupMenu.menu.add(3, 33, 0, "📖 Share to Story")
-        popupMenu.menu.add(3, 34, 0, "📥 Download")
-        popupMenu.menu.add(3, 35, 0, "🖼️ Xem Media")
-        popupMenu.menu.add(3, 36, 0, "🔗 Mở Link")
-        popupMenu.menu.add(3, 37, 0, "📤 Gửi Data")
-        popupMenu.menu.add(3, 38, 0, "🔍 Mở Inline Query")
+        popupMenu.menu.add(3, 50, 0, "📷 Quét QRCode")
+        popupMenu.menu.add(3, 51, 0, "💰 Mở Invoice")
+        popupMenu.menu.add(3, 52, 0, "📢 Share App")
+        popupMenu.menu.add(3, 53, 0, "📖 Share to Story")
+        popupMenu.menu.add(3, 54, 0, "📥 Download")
+        popupMenu.menu.add(3, 55, 0, "🖼️ Xem Media")
+        popupMenu.menu.add(3, 56, 0, "🔗 Mở Link")
+        popupMenu.menu.add(3, 57, 0, "📤 Gửi Data")
+        popupMenu.menu.add(3, 58, 0, "🔍 Mở Inline Query")
+        popupMenu.menu.add(3, 59, 0, "🚪 Đóng App")
 
         // === 5. PERMISSIONS - Quyền truy cập ===
-        popupMenu.menu.add(4, 40, 0, "✍️ Yêu cầu quyền gửi tin")
-        popupMenu.menu.add(4, 41, 0, "📞 Yêu cầu số điện thoại")
-        popupMenu.menu.add(4, 42, 0, "📋 Đọc Clipboard")
+        popupMenu.menu.add(4, 60, 0, "✍️ Yêu cầu quyền gửi tin")
+        popupMenu.menu.add(4, 61, 0, "📞 Yêu cầu số điện thoại")
+        popupMenu.menu.add(4, 62, 0, "📋 Đọc Clipboard")
 
-        // === 6. STORAGE - Lưu trữ ===
-        // (Cloud Storage chỉ test qua UI)
+        // === 6. STORAGE - Cloud Storage ===
+        popupMenu.menu.add(5, 70, 0, "💾 Lưu (test_key)")
+        popupMenu.menu.add(5, 71, 0, "📖 Đọc (test_key)")
+        popupMenu.menu.add(5, 72, 0, "🗑️ Xóa (test_key)")
+        popupMenu.menu.add(5, 73, 0, "🔑 Lấy Keys")
 
         // === 7. SENSORS - Cảm biến ===
-        popupMenu.menu.add(5, 50, 0, "📱 Accelerometer Start")
-        popupMenu.menu.add(5, 51, 0, "🌀 Gyroscope Start")
-        popupMenu.menu.add(5, 52, 0, "🧭 Device Orientation Start")
+        popupMenu.menu.add(6, 80, 0, "📱 Accelerometer Start")
+        popupMenu.menu.add(6, 81, 0, "📱 Accelerometer Stop")
+        popupMenu.menu.add(6, 82, 0, "🌀 Gyroscope Start")
+        popupMenu.menu.add(6, 83, 0, "🌀 Gyroscope Stop")
+        popupMenu.menu.add(6, 84, 0, "🧭 Device Orientation Start")
+        popupMenu.menu.add(6, 85, 0, "🧭 Device Orientation Stop")
 
         // === 8. LOCATION - Vị trí ===
-        popupMenu.menu.add(6, 60, 0, "📍 Lấy vị trí")
+        popupMenu.menu.add(7, 90, 0, "📍 Lấy vị trí")
+        popupMenu.menu.add(7, 91, 0, "⚙️ Cài đặt Location")
 
         // === 9. BIOMETRIC - Sinh trắc học ===
-        popupMenu.menu.add(7, 70, 0, "🔐 Xác thực")
+        popupMenu.menu.add(8, 100, 0, "🔍 Kiểm tra Biometric")
+        popupMenu.menu.add(8, 101, 0, "🔐 Xác thực")
+        popupMenu.menu.add(8, 102, 0, "⚙️ Settings Biometric")
 
         // === 10. OTHERS - Khác ===
-        popupMenu.menu.add(8, 80, 0, "😀 Đặt Emoji Status")
-        popupMenu.menu.add(8, 81, 0, "🏠 Thêm vào Home Screen")
+        popupMenu.menu.add(9, 110, 0, "😀 Đặt Emoji Status")
+        popupMenu.menu.add(9, 111, 0, "🏠 Thêm vào Home Screen")
 
         popupMenu.setOnMenuItemClickListener { menuItem ->
             handleSDKMenuClick(menuItem.itemId)
@@ -423,61 +453,93 @@ class MainActivity : AppCompatActivity() {
 
         popupMenu.show()
     }
-    // Xử lý click từng SDK - GỌI TRỰC TIẾP window.Android
+
     private fun handleSDKMenuClick(itemId: Int) {
         val js = when (itemId) {
             // === 1. BUTTONS ===
             1 -> "if(window.Android) { window.Android.setMainButtonVisible(true); window.Android.setMainButtonText('Main Button'); }"
-            2 -> "if(window.Android) { window.Android.setSecondaryButtonVisible(true); window.Android.setSecondaryButtonText('Secondary'); }"
-            3 -> "if(window.Android) { window.Android.setBackButtonVisible(true); }"
-            4 -> "if(window.Android) { window.Android.setSettingsButtonVisible(true); }"
+            2 -> "if(window.Android) { window.Android.setMainButtonVisible(false); }"
+            3 -> "if(window.Android) { window.Android.setMainButtonText('💳 Thanh Toán'); }"
+            4 -> "if(window.Android) { window.Android.setMainButtonColor('#ff69b4'); }"
+            5 -> "if(window.Android) { window.Android.setMainButtonEnabled(true); }"
+            6 -> "if(window.Android) { window.Android.setMainButtonEnabled(false); }"
+            7 -> "if(window.Android) { window.Android.setMainButtonProgress(true); }"
+            8 -> "if(window.Android) { window.Android.setMainButtonProgress(false); }"
+            9 -> "if(window.Android) { window.Android.setSecondaryButtonVisible(true); window.Android.setSecondaryButtonText('Secondary'); }"
+            10 -> "if(window.Android) { window.Android.setSecondaryButtonVisible(false); }"
+            11 -> "if(window.Android) { window.Android.setBackButtonVisible(true); }"
+            12 -> "if(window.Android) { window.Android.setBackButtonVisible(false); }"
+            13 -> "if(window.Android) { window.Android.setSettingsButtonVisible(true); }"
+            14 -> "if(window.Android) { window.Android.setSettingsButtonVisible(false); }"
 
             // === 2. UI CONTROL ===
-            10 -> "if(window.Android) { window.Android.setHeaderColor('#ff0000'); }"
-            11 -> "if(window.Android) { window.Android.setBottomBarColor('#3390ec'); }"
-            12 -> "if(window.Android) { window.Android.expandViewport(); }"
-            13 -> "if(window.Android) { window.Android.setFullscreen(true); }"
-            14 -> "if(window.Android) { window.Android.setSwipeEnabled(false); }"
-            15 -> "if(window.Android) { window.Android.setClosingConfirmation(true); }"
+            20 -> "if(window.Android) { window.Android.setHeaderColor('#ff0000'); }"
+            21 -> "if(window.Android) { window.Android.setHeaderColor('#008000'); }"
+            22 -> "if(window.Android) { window.Android.setHeaderColor('secondary_bg_color'); }"
+            23 -> "if(window.Android) { window.Android.setBottomBarColor('#3390ec'); }"
+            24 -> "if(window.Android) { window.Android.setBottomBarColor('#ff5722'); }"
+            25 -> "if(window.Android) { window.Android.expandViewport(); }"
+            26 -> "if(window.Android) { window.Android.setFullscreen(true); }"
+            27 -> "if(window.Android) { window.Android.setFullscreen(false); }"
+            28 -> "if(window.Android) { window.Android.setSwipeEnabled(false); }"
+            29 -> "if(window.Android) { window.Android.setSwipeEnabled(true); }"
+            30 -> "if(window.Android) { window.Android.setClosingConfirmation(true); }"
+            31 -> "if(window.Android) { window.Android.setClosingConfirmation(false); }"
 
             // === 3. FEEDBACK ===
-            20 -> "if(window.Android) { window.Android.hapticFeedback('impact', 'light'); }"
-            21 -> "if(window.Android) { window.Android.hapticFeedback('impact', 'heavy'); }"
-            22 -> "if(window.Android) { window.Android.hapticFeedback('notification', 'success'); }"
-            23 -> "if(window.Android) { window.Android.hapticFeedback('notification', 'error'); }"
-            24 -> "if(window.Android) { window.Android.openPopup('Test', 'From Android Menu', '[{\"type\":\"ok\",\"text\":\"OK\"}]'); }"
+            40 -> "if(window.Android) { window.Android.showToast('Hello từ Menu!'); }"
+            41 -> "if(window.Android) { window.Android.hapticFeedback('impact', 'light'); }"
+            42 -> "if(window.Android) { window.Android.hapticFeedback('impact', 'heavy'); }"
+            43 -> "if(window.Android) { window.Android.hapticFeedback('notification', 'success'); }"
+            44 -> "if(window.Android) { window.Android.hapticFeedback('notification', 'error'); }"
+            45 -> "if(window.Android) { window.Android.hapticFeedback('selection_change', ''); }"
+            46 -> "if(window.Android) { window.Android.openPopup('Test', 'From Android Menu', '[{\"type\":\"ok\",\"text\":\"OK\"},{\"type\":\"cancel\",\"text\":\"Hủy\"}]'); }"
 
             // === 4. ACTIONS ===
-            30 -> "if(window.Android) { window.Android.scanQrCode(); }"
-            31 -> "if(window.Android) { window.Android.openInvoice('test-slug'); }"
-            32 -> "if(window.Android) { window.Android.shareText('Hello from SDK Menu!'); }"
-            33 -> "if(window.Android) { window.Android.shareStory('https://picsum.photos/800/600', 'From Menu', '', ''); }"
-            34 -> "if(window.Android) { window.Android.downloadFile('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'test.pdf'); }"
-            35 -> "if(window.Android) { window.Android.openMediaPreview('https://picsum.photos/800/600', 'photo'); }"
-            36 -> "if(window.Android) { window.Android.openLink('https://google.com'); }"
-            37 -> "if(window.Android) { window.Android.sendData('{\"from\":\"menu\"}'); }"
-            38 -> "if(window.Android) { window.Android.switchInlineQuery('test query', '[\"users\",\"groups\"]'); }"
+            50 -> "if(window.Android) { window.Android.scanQrCode(); }"
+            51 -> "if(window.Android) { window.Android.openInvoice('test-invoice-slug'); }"
+            52 -> "if(window.Android) { window.Android.shareText('Hello from SDK Menu! 🎉'); }"
+            53 -> "if(window.Android) { window.Android.shareStory('https://picsum.photos/800/600', 'From Menu', '', ''); }"
+            54 -> "if(window.Android) { window.Android.downloadFile('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'test.pdf'); }"
+            55 -> "if(window.Android) { window.Android.openMediaPreview('https://picsum.photos/800/600', 'photo'); }"
+            56 -> "if(window.Android) { window.Android.openLink('https://google.com'); }"
+            57 -> "if(window.Android) { window.Android.sendData('{\"from\":\"menu\",\"action\":\"test\"}'); }"
+            58 -> "if(window.Android) { window.Android.switchInlineQuery('test query', '[\"users\",\"groups\"]'); }"
+            59 -> "if(window.Android) { window.Android.closeApp(); }"
 
             // === 5. PERMISSIONS ===
-            40 -> "if(window.Android) { window.Android.requestWriteAccess(); }"
-            41 -> "if(window.Android) { window.Android.requestContact(); }"
-            42 -> "if(window.Android) { window.Android.readTextFromClipboard(); }"
+            60 -> "if(window.Android) { window.Android.requestWriteAccess(); }"
+            61 -> "if(window.Android) { window.Android.requestContact(); }"
+            62 -> "if(window.Android) { window.Android.readTextFromClipboard(); }"
+
+            // === 6. STORAGE ===
+            70 -> "if(window.Android) { window.Android.cloudStorageSetItem('test_key', 'Hello from Menu ' + Date.now()); window.Android.showToast('Đã lưu test_key'); }"
+            71 -> "if(window.Android) { var val = window.Android.cloudStorageGetItem('test_key'); alert('Giá trị: ' + val); }"
+            72 -> "if(window.Android) { window.Android.cloudStorageRemoveItem('test_key'); window.Android.showToast('Đã xóa test_key'); }"
+            73 -> "if(window.Android) { var keys = window.Android.cloudStorageGetKeys(); alert('Keys: ' + keys); }"
 
             // === 7. SENSORS ===
-            50 -> "if(window.Android) { window.Android.startAccelerometer('ui'); }"
-            51 -> "if(window.Android) { window.Android.startGyroscope('ui'); }"
-            52 -> "if(window.Android) { window.Android.startDeviceOrientation('ui', false); }"
+            80 -> "if(window.Android) { window.Android.startAccelerometer('ui'); }"
+            81 -> "if(window.Android) { window.Android.stopAccelerometer(); }"
+            82 -> "if(window.Android) { window.Android.startGyroscope('ui'); }"
+            83 -> "if(window.Android) { window.Android.stopGyroscope(); }"
+            84 -> "if(window.Android) { window.Android.startDeviceOrientation('ui', false); }"
+            85 -> "if(window.Android) { window.Android.stopDeviceOrientation(); }"
 
             // === 8. LOCATION ===
-            60 -> "if(window.Android) { window.Android.getCurrentLocation(); }"
+            90 -> "if(window.Android) { window.Android.getCurrentLocation(); }"
+            91 -> "if(window.Android) { window.Android.openLocationSettings(); }"
 
             // === 9. BIOMETRIC ===
-            70 -> "if(window.Android) { window.Android.biometricAuthenticate('From Menu'); }"
+            100 -> "if(window.Android) { var info = window.Android.biometricInit(); alert('Biometric Info: ' + info); }"
+            101 -> "if(window.Android) { window.Android.biometricAuthenticate('From Menu'); }"
+            102 -> "if(window.Android) { window.Android.biometricOpenSettings(); }"
 
             // === 10. OTHERS ===
-            80 -> "if(window.Android) { window.Android.setEmojiStatus('5368324170671202286', 3600); }"
-            81 -> "if(window.Android) { window.Android.addToHomeScreen(); }"
-
+            110 -> "if(window.Android) { window.Android.setEmojiStatus('5368324170671202286', 3600); }"
+            111 -> "if(window.Android) { window.Android.addToHomeScreen(); }"
+            112 -> "if(window.Android) { window.Android.setBottomBarColor('#4caf50'); }"
+            113 -> "if(window.Android) { window.Android.setBottomBarColor('#9c27b0'); }"
             else -> null
         }
 
@@ -755,7 +817,10 @@ class WebAppInterface(private val context: Context) {
                 val toolbar = context.findViewById<Toolbar>(R.id.toolbar)
                 val parentAppBar = toolbar?.parent as? android.view.View
                 parentAppBar?.visibility = android.view.View.GONE
-
+                val contentLayout = context.findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.contentLayout)
+                val params = contentLayout?.layoutParams as? androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams
+                params?.behavior = null
+                contentLayout?.requestLayout()
                 // Làm cho nội dung vẽ full screen
                 val window = context.window
                 window.statusBarColor = android.graphics.Color.TRANSPARENT
