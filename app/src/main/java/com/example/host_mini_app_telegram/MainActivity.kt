@@ -34,6 +34,7 @@ import androidx.fragment.app.FragmentActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.PopupMenu
+import java.net.URLEncoder
 
 class MainActivity : AppCompatActivity() {
 
@@ -168,19 +169,36 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         }
-        webView.addJavascriptInterface(WebAppInterface(this), "Android")
+        webView.addJavascriptInterface(WebAppInterface(this), "TelegramWebviewProxy")
 
         val userId = intent.getStringExtra("user_id") ?: "999999"
         val firstName = intent.getStringExtra("first_name") ?: "Hoàng"
         val username = intent.getStringExtra("username") ?: "Hoàng Hữu Tín"
         val startParam = intent.getStringExtra("start_param") ?: ""
         val assetUrl = "file:///android_asset/dist/index.html"
-        val fullUrl = "$assetUrl?user_id=$userId&first_name=$firstName&username=$username&tgWebAppStartParam=$startParam"
-
-
+        val launchParams = buildLaunchParams()
+        val fullUrl = "$assetUrl#/?$launchParams"
+        android.util.Log.d("MainActivity", "Loading URL: $fullUrl")
         webView.loadUrl(fullUrl)
     }
-
+    private fun buildLaunchParams(): String {
+        val themeParams = getThemeParamsJson()
+        return "tgWebAppVersion=8.4" +
+                "&tgWebAppPlatform=android" +
+                "&tgWebAppThemeParams=${URLEncoder.encode(themeParams, "UTF-8")}"
+    }
+    private fun getThemeParamsJson(): String {
+        val isDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val bg_color = if (isDarkMode) "#17212b" else "#ffffff"
+        val text_color = if (isDarkMode) "#f5f5f5" else "#000000"
+        val hint_color = if (isDarkMode) "#708499" else "#999999"
+        val button_color = if (isDarkMode) "#5288c1" else "#3390ec"
+        val button_text_color = "#ffffff"
+        val secondary_bg_color = if (isDarkMode) "#232e3c" else "#f0f2f5"
+        val header_bg_color = if (isDarkMode) "#17212b" else "#ffffff"
+        val accent_text_color = if (isDarkMode) "#6ab2f2" else "#168acd"
+        return """{"bg_color":"$bg_color","text_color":"$text_color","hint_color":"$hint_color","link_color":"$accent_text_color","button_color":"$button_color","button_text_color":"$button_text_color","secondary_bg_color":"$secondary_bg_color","header_bg_color":"$header_bg_color","accent_text_color":"$accent_text_color","section_bg_color":"$header_bg_color","section_header_text_color":"$accent_text_color","subtitle_text_color":"$hint_color","destructive_text_color":"#ff3b30"}"""
+    }
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         syncTheme()
@@ -249,7 +267,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        webView.removeJavascriptInterface("Android")
+        webView.removeJavascriptInterface("TelegramWebviewProxy")
         webView.loadUrl("about:blank")
         super.onDestroy()
     }
@@ -552,943 +570,942 @@ class MainActivity : AppCompatActivity() {
 
 
 class WebAppInterface(private val context: Context) {
-
     @JavascriptInterface
-    fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    fun postEvent(eventType: String, eventData: String?) {
+        Toast.makeText(context, "Hello", Toast.LENGTH_SHORT).show()
     }
-
-    @JavascriptInterface
-    fun vibrate() {
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            vibrator.vibrate(100)
-        }
     }
-
-    @JavascriptInterface
-    fun closeApp() {
-        if (context is Activity) {
-            context.finish()
-        }
-    }
-
-    @JavascriptInterface
-    fun setMainButtonText(text: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnMain = context.findViewById<Button>(R.id.btnMain)
-                btnMain.text = text
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setMainButtonVisible(isVisible: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnMain = context.findViewById<Button>(R.id.btnMain)
-                btnMain.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setMainButtonColor(color: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnMain = context.findViewById<Button>(R.id.btnMain)
-                try {
-                    btnMain.setBackgroundColor(android.graphics.Color.parseColor(color))
-                } catch (e: Exception) {
-                    // Ignore color parse error
-                }
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun openPopup(title: String, message: String, buttonsJson: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val builder = AlertDialog.Builder(context)
-                builder.setTitle(title)
-                builder.setMessage(message)
-                builder.setCancelable(false)
-                try {
-                    val buttons = org.json.JSONArray(buttonsJson)
-
-                    for (i in 0 until buttons.length()) {
-                        val btn = buttons.getJSONObject(i)
-                        val id = btn.optString("id", "")
-                        val type = btn.optString("type", "default")
-                        var text = btn.optString("text", "")
-
-                        if (text.isEmpty()) {
-                            text = when (type) {
-                                "ok" -> "Đồng ý"
-                                "cancel" -> "Hủy"
-                                "destructive" -> "Xóa"
-                                else -> "OK"
-                            }
-                        }
-
-                        val listener = { _: android.content.DialogInterface, _: Int -> sendPopupEvent(id) }
-
-                        when (i) {
-                            0 -> builder.setPositiveButton(text, listener)
-                            1 -> builder.setNegativeButton(text, listener)
-                            2 -> builder.setNeutralButton(text, listener)
-                        }
-                    }
-
-                } catch (e: Exception) {
-                    builder.setPositiveButton("OK (Fallback)") { _, _ -> sendPopupEvent("cancel") }
-                }
-
-                builder.show()
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun hapticFeedback(type: String, style: String) {
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            when (type) {
-                "impact" -> {
-                    when (style) {
-                        "light" -> vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
-                        "medium" -> vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
-                        "heavy" -> vibrator.vibrate(VibrationEffect.createOneShot(80, 255))
-                        else -> vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
-                    }
-                }
-                "notification" -> {
-                    when (style) {
-                        "success" -> {
-                            val timing = longArrayOf(0, 50, 50, 100)
-                            val amplitudes = intArrayOf(0, 100, 0, 200)
-                            vibrator.vibrate(VibrationEffect.createWaveform(timing, amplitudes, -1))
-                        }
-                        "warning" -> {
-                            val timing = longArrayOf(0, 50, 100, 200)
-                            val amplitudes = intArrayOf(0, 150, 0, 150)
-                            vibrator.vibrate(VibrationEffect.createWaveform(timing, amplitudes, -1))
-                        }
-                        "error" -> {
-                            val timing = longArrayOf(0, 50, 50, 50, 50, 100)
-                            val amplitudes = intArrayOf(0, 200, 0, 200, 0, 200)
-                            vibrator.vibrate(VibrationEffect.createWaveform(timing, amplitudes, -1))
-                        }
-                    }
-                }
-                "selection_change" -> {
-                    vibrator.vibrate(VibrationEffect.createOneShot(10, 50))
-                }
-            }
-        } else {
-            vibrator.vibrate(50)
-        }
-    }
-    @JavascriptInterface
-    fun requestTheme() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                (context as? MainActivity)?.syncTheme()
-            }
-        }
-    }
-    @JavascriptInterface
-    fun openLink(url: String) {
-        try {
-            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            if (context is Activity) {
-                context.runOnUiThread {
-                    Toast.makeText(context, "Cannot open link: $url", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun openTelegramLink(url: String) {
-        openLink(url)
-    }
-    private fun sendPopupEvent(buttonId: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val webView = context.findViewById<WebView>(R.id.webView)
-                val js = "if (window.onAndroidPopupClosed) { window.onAndroidPopupClosed('$buttonId'); }"
-                webView.evaluateJavascript(js, null)
-            }
-        }
-    }
-    @JavascriptInterface
-    fun scanQrCode() {
-        if (context is MainActivity) {
-            context.runOnUiThread {
-                context.checkAndStartQrScan()
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setBackButtonVisible(isVisible: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnBack = context.findViewById<Button>(R.id.btnBack)
-                btnBack.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
-            }
-        }
-    }
-    @JavascriptInterface
-    fun setHeaderColor(colorKeyOrHex: String) {
-        if (context is MainActivity) {
-            context.runOnUiThread {
-                context.updateHeaderColor(colorKeyOrHex)
-            }
-        }
-    }
-    @JavascriptInterface
-    fun setSettingsButtonVisible(isVisible: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnSettings = context.findViewById<Button>(R.id.btnSettings)
-                btnSettings.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
-            }
-        }
-    }
-    @JavascriptInterface
-    fun setMainButtonEnabled(enabled: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnMain = context.findViewById<Button>(R.id.btnMain)
-                btnMain.isEnabled = enabled
-                btnMain.alpha = if (enabled) 1.0f else 0.5f
-            }
-        }
-    }
-    @JavascriptInterface
-    fun setMainButtonProgress(isVisible: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnMain = context.findViewById<Button>(R.id.btnMain)
-                if (isVisible) {
-                    // Save original text and show loading indicator
-                    btnMain.tag = btnMain.text  // Save original text
-                    btnMain.text = "⏳ Đang xử lý..."
-                    btnMain.isEnabled = false
-                    btnMain.alpha = 0.7f
-                } else {
-                    // Restore original text
-                    val originalText = btnMain.tag as? String
-                    if (originalText != null) {
-                        btnMain.text = originalText
-                    }
-                    btnMain.isEnabled = true
-                    btnMain.alpha = 1.0f
-                }
-            }
-        }
-    }
-    @JavascriptInterface
-    fun setClosingConfirmation(needConfirmation: Boolean) {
-        if (context is MainActivity) {
-            context.runOnUiThread {
-                (context as MainActivity).setNeedCloseConfirmation(needConfirmation)
-            }
-        }
-    }
-    @JavascriptInterface
-    fun expandViewport() {
-        if (context is MainActivity) {
-            context.runOnUiThread {
-                // Đánh dấu là đã expanded
-                context.setExpanded(true)
-
-                // Ẩn AppBarLayout
-                val toolbar = context.findViewById<Toolbar>(R.id.toolbar)
-                val parentAppBar = toolbar?.parent as? android.view.View
-                parentAppBar?.visibility = android.view.View.GONE
-                val contentLayout = context.findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.contentLayout)
-                val params = contentLayout?.layoutParams as? androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams
-                params?.behavior = null
-                contentLayout?.requestLayout()
-                // Làm cho nội dung vẽ full screen
-                val window = context.window
-                window.statusBarColor = android.graphics.Color.TRANSPARENT
-
-                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
-
-                // Xóa padding của main container
-                val mainContainer = context.findViewById<android.view.View>(R.id.main)
-                mainContainer?.setPadding(0, 0, 0, mainContainer.paddingBottom)
-
-                // Chờ layout recalculate
-                val webView = context.findViewById<WebView>(R.id.webView)
-                webView.postDelayed({
-                    val js = """
-                    if (window.onViewportExpanded) {
-                        window.onViewportExpanded(${webView.height}, ${webView.width});
-                    }
-                """
-                    webView.evaluateJavascript(js, null)
-                }, 200)
-            }
-        }
-    }
-    // Cloud Storage using SharedPreferences
-    @JavascriptInterface
-    fun cloudStorageSetItem(key: String, value: String) {
-        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
-        prefs.edit().putString(key, value).apply()
-    }
-
-    @JavascriptInterface
-    fun cloudStorageGetItem(key: String): String {
-        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
-        return prefs.getString(key, "") ?: ""
-    }
-
-    @JavascriptInterface
-    fun cloudStorageRemoveItem(key: String) {
-        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
-        prefs.edit().remove(key).apply()
-    }
-
-    @JavascriptInterface
-    fun cloudStorageGetKeys(): String {
-        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
-        val keys = prefs.all.keys.toList()
-        return org.json.JSONArray(keys).toString()
-    }
-    @JavascriptInterface
-    fun biometricInit(): String {
-        val biometricManager = BiometricManager.from(context)
-        val canAuthenticate = biometricManager.canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                    BiometricManager.Authenticators.BIOMETRIC_WEAK
-        )
-
-        val available = canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS
-        val type = when {
-            canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS -> "finger"
-            else -> ""
-        }
-
-        return """{"available":$available,"type":"$type","access_requested":true,"access_granted":$available}"""
-    }
-    @JavascriptInterface
-    fun biometricAuthenticate(reason: String) {
-        if (context is FragmentActivity) {
-            context.runOnUiThread {
-                val executor = ContextCompat.getMainExecutor(context)
-                val webView = context.findViewById<WebView>(R.id.webView)
-
-                val callback = object : BiometricPrompt.AuthenticationCallback() {
-                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                        val token = "biometric_token_" + System.currentTimeMillis()
-                        webView.evaluateJavascript(
-                            "if(window.onBiometricResult) { window.onBiometricResult(true, '$token'); }",
-                            null
-                        )
-                    }
-
-                    override fun onAuthenticationFailed() {
-                        webView.evaluateJavascript(
-                            "if(window.onBiometricResult) { window.onBiometricResult(false, ''); }",
-                            null
-                        )
-                    }
-
-                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                        webView.evaluateJavascript(
-                            "if(window.onBiometricResult) { window.onBiometricResult(false, ''); }",
-                            null
-                        )
-                    }
-                }
-
-                val biometricPrompt = BiometricPrompt(context, executor, callback)
-
-                val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Xác thực sinh trắc học")
-                    .setSubtitle(reason)
-                    .setNegativeButtonText("Hủy")
-                    .build()
-
-                biometricPrompt.authenticate(promptInfo)
-            }
-        }
-    }
-    @JavascriptInterface
-    fun biometricOpenSettings() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                try {
-                    val intent = android.content.Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS)
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "Không thể mở Settings", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-    // --- Secondary Button ---
-    @JavascriptInterface
-    fun setSecondaryButtonText(text: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                // Lưu ý: Bạn cần thêm Button với id btnSecondary vào activity_main.xml hoặc layout tương ứng
-                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
-                btnSecondary?.text = text
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setSecondaryButtonVisible(isVisible: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
-                btnSecondary?.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setSecondaryButtonColor(color: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
-                try {
-                    btnSecondary?.setBackgroundColor(android.graphics.Color.parseColor(color))
-                } catch (e: Exception) { }
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setSecondaryButtonEnabled(enabled: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
-                btnSecondary?.isEnabled = enabled
-                btnSecondary?.alpha = if (enabled) 1.0f else 0.5f
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setSecondaryButtonProgress(isVisible: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
-                if (isVisible) {
-                    btnSecondary?.tag = btnSecondary?.text
-                    btnSecondary?.text = "⏳..."
-                    btnSecondary?.isEnabled = false
-                } else {
-                    val originalText = btnSecondary?.tag as? String
-                    if (originalText != null) btnSecondary?.text = originalText
-                    btnSecondary?.isEnabled = true
-                }
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun setSecondaryButtonPosition(position: String) {
-        // Có thể implement logic thay đổi vị trí button nếu cần
-    }
-
-    // --- Swipe Behavior ---
-    @JavascriptInterface
-    fun setSwipeEnabled(enabled: Boolean) {
-        if (context is MainActivity) {
-            context.setSwipeEnabled(enabled)
-        }
-    }
-
-    // --- Invoice ---
-    @JavascriptInterface
-    fun openInvoice(slug: String) {
-        if (context is MainActivity) {
-            context.openInvoice(slug)
-        }
-    }
-
-    // --- Fullscreen ---
-    @JavascriptInterface
-    fun setFullscreen(fullscreen: Boolean) {
-        if (context is MainActivity) {
-            context.setFullscreen(fullscreen)
-        }
-    }
-
-    // --- Share ---
-    @JavascriptInterface
-    fun shareText(text: String) {
-        val intent = android.content.Intent(android.content.Intent.ACTION_SEND)
-        intent.type = "text/plain"
-        intent.putExtra(android.content.Intent.EXTRA_TEXT, text)
-        context.startActivity(android.content.Intent.createChooser(intent, "Share"))
-    }
-    // --- Request Write Access ---
-    @JavascriptInterface
-    fun requestWriteAccess() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                AlertDialog.Builder(context)
-                    .setTitle("Yêu cầu quyền")
-                    .setMessage("Bot muốn gửi tin nhắn cho bạn. Bạn có đồng ý không?")
-                    .setPositiveButton("Đồng ý") { _, _ ->
-                        // Gửi event về Mini App
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('write_access_requested', {detail: {status: 'allowed'}}));",
-                            null
-                        )
-                    }
-                    .setNegativeButton("Từ chối") { _, _ ->
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('write_access_requested', {detail: {status: 'declined'}}));",
-                            null
-                        )
-                    }
-                    .show()
-            }
-        }
-    }
-
-    // --- Request Contact ---
-    @JavascriptInterface
-    fun requestContact() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                AlertDialog.Builder(context)
-                    .setTitle("Chia sẻ số điện thoại")
-                    .setMessage("Mini App muốn biết số điện thoại của bạn. Bạn có đồng ý chia sẻ không?")
-                    .setPositiveButton("Đồng ý") { _, _ ->
-                        // Gửi event với mock contact data
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        val contactJson = """{
-                        "phone_number": "+84123456789",
-                        "first_name": "User",
-                        "last_name": "Test",
-                        "user_id": 999999
-                    }""".trimIndent().replace("\n", "")
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('phone_requested', {detail: {status: 'sent', contact: $contactJson}}));",
-                            null
-                        )
-                    }
-                    .setNegativeButton("Từ chối") { _, _ ->
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('phone_requested', {detail: {status: 'cancelled'}}));",
-                            null
-                        )
-                    }
-                    .show()
-            }
-        }
-    }
-    // --- Bottom Bar Color ---
-    @JavascriptInterface
-    fun setBottomBarColor(color: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                try {
-                    val parsedColor = android.graphics.Color.parseColor(color)
-                    // Set Navigation Bar Color
-                    context.window.navigationBarColor = parsedColor
-                    Toast.makeText(context, "Bottom Bar Color: $color", Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) {
-                    Toast.makeText(context, "Invalid color: $color", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    // --- Emoji Status ---
-    @JavascriptInterface
-    fun setEmojiStatus(emojiId: String, duration: Int) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                // In real Telegram, this would set the user's emoji status
-                // For our mock, we just show a dialog and fake success
-                AlertDialog.Builder(context)
-                    .setTitle("Set Emoji Status")
-                    .setMessage("Emoji ID: $emojiId\nDuration: ${duration}s\n\n(Tính năng này chỉ hoạt động trên Telegram thật)")
-                    .setPositiveButton("OK") { _, _ ->
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('emoji_status_set', {detail: {success: true}}));",
-                            null
-                        )
-                    }
-                    .show()
-            }
-        }
-    }
-    // --- Add to Home Screen ---
-    @JavascriptInterface
-    fun addToHomeScreen() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                // Normally would use ShortcutManager for Android 7.1+
-                // For demo, just show success
-                AlertDialog.Builder(context)
-                    .setTitle("Thêm vào Home Screen")
-                    .setMessage("Tạo shortcut cho Mini App trên màn hình chính?")
-                    .setPositiveButton("Thêm") { _, _ ->
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('home_screen_added', {detail: {status: 'added'}}));",
-                            null
-                        )
-                        Toast.makeText(context, "Đã thêm vào Home Screen!", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNegativeButton("Hủy", null)
-                    .show()
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun checkHomeScreenStatus(): String {
-        return """{"status":"unknown"}"""
-    }
-
-    // --- Accelerometer ---
-    private var accelerometerListener: android.hardware.SensorEventListener? = null
-
-    @JavascriptInterface
-    fun startAccelerometer(refreshRate: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-                val accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
-                val webView = context.findViewById<WebView>(R.id.webView)
-
-                accelerometerListener = object : android.hardware.SensorEventListener {
-                    override fun onSensorChanged(event: android.hardware.SensorEvent) {
-                        val x = event.values[0]
-                        val y = event.values[1]
-                        val z = event.values[2]
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('accelerometer_changed', {detail: {x: $x, y: $y, z: $z}}));",
-                            null
-                        )
-                    }
-                    override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
-                }
-                sensorManager.registerListener(accelerometerListener, accelerometer, android.hardware.SensorManager.SENSOR_DELAY_UI)
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun stopAccelerometer() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-                accelerometerListener?.let { sensorManager.unregisterListener(it) }
-            }
-        }
-    }
-
-    // --- Gyroscope ---
-    private var gyroscopeListener: android.hardware.SensorEventListener? = null
-
-    @JavascriptInterface
-    fun startGyroscope(refreshRate: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-                val gyroscope = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_GYROSCOPE)
-                val webView = context.findViewById<WebView>(R.id.webView)
-
-                gyroscopeListener = object : android.hardware.SensorEventListener {
-                    override fun onSensorChanged(event: android.hardware.SensorEvent) {
-                        val x = event.values[0]
-                        val y = event.values[1]
-                        val z = event.values[2]
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('gyroscope_changed', {detail: {x: $x, y: $y, z: $z}}));",
-                            null
-                        )
-                    }
-                    override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
-                }
-                sensorManager.registerListener(gyroscopeListener, gyroscope, android.hardware.SensorManager.SENSOR_DELAY_UI)
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun stopGyroscope() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-                gyroscopeListener?.let { sensorManager.unregisterListener(it) }
-            }
-        }
-    }
-    // --- Device Orientation ---
-    private var orientationListener: android.hardware.SensorEventListener? = null
-
-    @JavascriptInterface
-    fun startDeviceOrientation(refreshRate: String, needAbsolute: Boolean) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-                val orientationSensor = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ROTATION_VECTOR)
-                val webView = context.findViewById<WebView>(R.id.webView)
-
-                orientationListener = object : android.hardware.SensorEventListener {
-                    override fun onSensorChanged(event: android.hardware.SensorEvent) {
-                        val rotationMatrix = FloatArray(9)
-                        android.hardware.SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-                        val orientation = FloatArray(3)
-                        android.hardware.SensorManager.getOrientation(rotationMatrix, orientation)
-
-                        val alpha = Math.toDegrees(orientation[0].toDouble())
-                        val beta = Math.toDegrees(orientation[1].toDouble())
-                        val gamma = Math.toDegrees(orientation[2].toDouble())
-
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('device_orientation_changed', {detail: {alpha: $alpha, beta: $beta, gamma: $gamma, absolute: $needAbsolute}}));",
-                            null
-                        )
-                    }
-                    override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
-                }
-                sensorManager.registerListener(orientationListener, orientationSensor, android.hardware.SensorManager.SENSOR_DELAY_UI)
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun stopDeviceOrientation() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-                orientationListener?.let { sensorManager.unregisterListener(it) }
-            }
-        }
-    }
-
-    // --- Location Manager ---
-    @JavascriptInterface
-    fun openLocationSettings() {
-        if (context is Activity) {
-            val intent = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-            context.startActivity(intent)
-        }
-    }
-
-    @JavascriptInterface
-    fun getCurrentLocation() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val webView = context.findViewById<WebView>(R.id.webView)
-
-                // Check permission first
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                    // Request permission (you may need to handle this in MainActivity)
-                    webView?.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('location_error', {detail: {error: 'Location permission denied'}}));",
-                        null
-                    )
-                    return@runOnUiThread
-                }
-
-                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
-                val location = locationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
-                    ?: locationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
-
-                if (location != null) {
-                    webView?.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('location_received', {detail: {latitude: ${location.latitude}, longitude: ${location.longitude}, accuracy: ${location.accuracy}}}));",
-                        null
-                    )
-                } else {
-                    webView?.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('location_error', {detail: {error: 'Could not get location'}}));",
-                        null
-                    )
-                }
-            }
-        }
-    }
-    // --- Story Widget ---
-    @JavascriptInterface
-    fun shareStory(mediaUrl: String, text: String, widgetLinkUrl: String, widgetLinkName: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                // In a real Telegram client, this would open the Stories composer
-                // For our demo, we'll show a dialog with the content
-                val message = """
-                Media URL: $mediaUrl
-                Caption: $text
-                Widget Link: $widgetLinkUrl
-                Widget Name: $widgetLinkName
-                
-                (Trong Telegram thật, nội dung này sẽ được mở trong Story Editor)
-            """.trimIndent()
-
-                AlertDialog.Builder(context)
-                    .setTitle("📖 Share to Story")
-                    .setMessage(message)
-                    .setPositiveButton("Chia sẻ") { _, _ ->
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('story_shared', {detail: {success: true}}));",
-                            null
-                        )
-                        Toast.makeText(context, "Đã chia sẻ lên Story!", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNegativeButton("Hủy") { _, _ ->
-                        val webView = context.findViewById<WebView>(R.id.webView)
-                        webView?.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('story_shared', {detail: {success: false}}));",
-                            null
-                        )
-                    }
-                    .show()
-            }
-        }
-    }
-    // --- Download File ---
-    @JavascriptInterface
-    fun downloadFile(url: String, fileName: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                try {
-                    val webView = context.findViewById<WebView>(R.id.webView)
-
-                    // Notify Mini App that download started
-                    webView?.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('file_download_started', {detail: {url: '$url', file_name: '$fileName'}}));",
-                        null
-                    )
-
-                    // Use DownloadManager
-                    val request = android.app.DownloadManager.Request(android.net.Uri.parse(url))
-                    request.setTitle(fileName)
-                    request.setDescription("Downloading from Mini App...")
-                    request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, fileName)
-
-                    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as android.app.DownloadManager
-                    downloadManager.enqueue(request)
-
-                    Toast.makeText(context, "Đang tải: $fileName", Toast.LENGTH_SHORT).show()
-
-                } catch (e: Exception) {
-                    val webView = context.findViewById<WebView>(R.id.webView)
-                    webView?.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('file_download_error', {detail: {error: '${e.message}'}}));",
-                        null
-                    )
-                    Toast.makeText(context, "Lỗi tải file: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    // --- Open Media Preview ---
-    @JavascriptInterface
-    fun openMediaPreview(url: String, type: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                try {
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-                    intent.setDataAndType(
-                        android.net.Uri.parse(url),
-                        if (type == "video") "video/*" else "image/*"
-                    )
-                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    // Fallback: Open in browser
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
-                    context.startActivity(intent)
-                }
-            }
-        }
-    }
-    // --- Read Text From Clipboard ---
-    @JavascriptInterface
-    fun readTextFromClipboard() {
-        if (context is Activity) {
-            context.runOnUiThread {
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val webView = context.findViewById<WebView>(R.id.webView)
-
-                val clipData = clipboard.primaryClip
-                if (clipData != null && clipData.itemCount > 0) {
-                    val text = clipData.getItemAt(0).text?.toString() ?: ""
-                    webView?.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('clipboard_text_received', {detail: {data: '$text'}}));",
-                        null
-                    )
-                } else {
-                    webView?.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('clipboard_text_received', {detail: {data: null, error: 'Clipboard is empty'}}));",
-                        null
-                    )
-                }
-            }
-        }
-    }
-
-    // --- Send Data (to Bot) ---
-    @JavascriptInterface
-    fun sendData(data: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                // In real Telegram, this sends data to bot and closes the Mini App
-                // For our demo, we show a dialog
-                AlertDialog.Builder(context)
-                    .setTitle("📤 Send Data to Bot")
-                    .setMessage("Data: $data\n\n(Trong Telegram thật, Mini App sẽ đóng và data được gửi tới bot)")
-                    .setPositiveButton("Gửi & Đóng") { _, _ ->
-                        Toast.makeText(context, "Đã gửi data tới Bot!", Toast.LENGTH_SHORT).show()
-                        // Close the Mini App (simulating Telegram behavior)
-                        context.finish()
-                    }
-                    .setNegativeButton("Hủy", null)
-                    .show()
-            }
-        }
-    }
-    // --- Switch Inline Query ---
-    @JavascriptInterface
-    fun switchInlineQuery(query: String, chatTypesJson: String) {
-        if (context is Activity) {
-            context.runOnUiThread {
-                // In real Telegram, this switches to another chat and inserts @bot query
-                // For our demo, we show a dialog
-                AlertDialog.Builder(context)
-                    .setTitle("🔍 Switch Inline Query")
-                    .setMessage("Query: @bot $query\nChat Types: $chatTypesJson\n\n(Trong Telegram thật, sẽ mở chat picker và chèn inline query)")
-                    .setPositiveButton("OK") { _, _ ->
-                        Toast.makeText(context, "Inline query: $query", Toast.LENGTH_SHORT).show()
-                    }
-                    .show()
-            }
-        }
-    }
-}
+//
+//    @JavascriptInterface
+//    fun vibrate() {
+//        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+//        } else {
+//            vibrator.vibrate(100)
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun closeApp() {
+//        if (context is Activity) {
+//            context.finish()
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setMainButtonText(text: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnMain = context.findViewById<Button>(R.id.btnMain)
+//                btnMain.text = text
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setMainButtonVisible(isVisible: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnMain = context.findViewById<Button>(R.id.btnMain)
+//                btnMain.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setMainButtonColor(color: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnMain = context.findViewById<Button>(R.id.btnMain)
+//                try {
+//                    btnMain.setBackgroundColor(android.graphics.Color.parseColor(color))
+//                } catch (e: Exception) {
+//                    // Ignore color parse error
+//                }
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun openPopup(title: String, message: String, buttonsJson: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val builder = AlertDialog.Builder(context)
+//                builder.setTitle(title)
+//                builder.setMessage(message)
+//                builder.setCancelable(false)
+//                try {
+//                    val buttons = org.json.JSONArray(buttonsJson)
+//
+//                    for (i in 0 until buttons.length()) {
+//                        val btn = buttons.getJSONObject(i)
+//                        val id = btn.optString("id", "")
+//                        val type = btn.optString("type", "default")
+//                        var text = btn.optString("text", "")
+//
+//                        if (text.isEmpty()) {
+//                            text = when (type) {
+//                                "ok" -> "Đồng ý"
+//                                "cancel" -> "Hủy"
+//                                "destructive" -> "Xóa"
+//                                else -> "OK"
+//                            }
+//                        }
+//
+//                        val listener = { _: android.content.DialogInterface, _: Int -> sendPopupEvent(id) }
+//
+//                        when (i) {
+//                            0 -> builder.setPositiveButton(text, listener)
+//                            1 -> builder.setNegativeButton(text, listener)
+//                            2 -> builder.setNeutralButton(text, listener)
+//                        }
+//                    }
+//
+//                } catch (e: Exception) {
+//                    builder.setPositiveButton("OK (Fallback)") { _, _ -> sendPopupEvent("cancel") }
+//                }
+//
+//                builder.show()
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun hapticFeedback(type: String, style: String) {
+//        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            when (type) {
+//                "impact" -> {
+//                    when (style) {
+//                        "light" -> vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
+//                        "medium" -> vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+//                        "heavy" -> vibrator.vibrate(VibrationEffect.createOneShot(80, 255))
+//                        else -> vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+//                    }
+//                }
+//                "notification" -> {
+//                    when (style) {
+//                        "success" -> {
+//                            val timing = longArrayOf(0, 50, 50, 100)
+//                            val amplitudes = intArrayOf(0, 100, 0, 200)
+//                            vibrator.vibrate(VibrationEffect.createWaveform(timing, amplitudes, -1))
+//                        }
+//                        "warning" -> {
+//                            val timing = longArrayOf(0, 50, 100, 200)
+//                            val amplitudes = intArrayOf(0, 150, 0, 150)
+//                            vibrator.vibrate(VibrationEffect.createWaveform(timing, amplitudes, -1))
+//                        }
+//                        "error" -> {
+//                            val timing = longArrayOf(0, 50, 50, 50, 50, 100)
+//                            val amplitudes = intArrayOf(0, 200, 0, 200, 0, 200)
+//                            vibrator.vibrate(VibrationEffect.createWaveform(timing, amplitudes, -1))
+//                        }
+//                    }
+//                }
+//                "selection_change" -> {
+//                    vibrator.vibrate(VibrationEffect.createOneShot(10, 50))
+//                }
+//            }
+//        } else {
+//            vibrator.vibrate(50)
+//        }
+//    }
+//    @JavascriptInterface
+//    fun requestTheme() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                (context as? MainActivity)?.syncTheme()
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun openLink(url: String) {
+//        try {
+//            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+//            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+//            context.startActivity(intent)
+//        } catch (e: Exception) {
+//            if (context is Activity) {
+//                context.runOnUiThread {
+//                    Toast.makeText(context, "Cannot open link: $url", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun openTelegramLink(url: String) {
+//        openLink(url)
+//    }
+//    private fun sendPopupEvent(buttonId: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//                val js = "if (window.onAndroidPopupClosed) { window.onAndroidPopupClosed('$buttonId'); }"
+//                webView.evaluateJavascript(js, null)
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun scanQrCode() {
+//        if (context is MainActivity) {
+//            context.runOnUiThread {
+//                context.checkAndStartQrScan()
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setBackButtonVisible(isVisible: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnBack = context.findViewById<Button>(R.id.btnBack)
+//                btnBack.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun setHeaderColor(colorKeyOrHex: String) {
+//        if (context is MainActivity) {
+//            context.runOnUiThread {
+//                context.updateHeaderColor(colorKeyOrHex)
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun setSettingsButtonVisible(isVisible: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnSettings = context.findViewById<Button>(R.id.btnSettings)
+//                btnSettings.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun setMainButtonEnabled(enabled: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnMain = context.findViewById<Button>(R.id.btnMain)
+//                btnMain.isEnabled = enabled
+//                btnMain.alpha = if (enabled) 1.0f else 0.5f
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun setMainButtonProgress(isVisible: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnMain = context.findViewById<Button>(R.id.btnMain)
+//                if (isVisible) {
+//                    // Save original text and show loading indicator
+//                    btnMain.tag = btnMain.text  // Save original text
+//                    btnMain.text = "⏳ Đang xử lý..."
+//                    btnMain.isEnabled = false
+//                    btnMain.alpha = 0.7f
+//                } else {
+//                    // Restore original text
+//                    val originalText = btnMain.tag as? String
+//                    if (originalText != null) {
+//                        btnMain.text = originalText
+//                    }
+//                    btnMain.isEnabled = true
+//                    btnMain.alpha = 1.0f
+//                }
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun setClosingConfirmation(needConfirmation: Boolean) {
+//        if (context is MainActivity) {
+//            context.runOnUiThread {
+//                (context as MainActivity).setNeedCloseConfirmation(needConfirmation)
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun expandViewport() {
+//        if (context is MainActivity) {
+//            context.runOnUiThread {
+//                // Đánh dấu là đã expanded
+//                context.setExpanded(true)
+//
+//                // Ẩn AppBarLayout
+//                val toolbar = context.findViewById<Toolbar>(R.id.toolbar)
+//                val parentAppBar = toolbar?.parent as? android.view.View
+//                parentAppBar?.visibility = android.view.View.GONE
+//                val contentLayout = context.findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.contentLayout)
+//                val params = contentLayout?.layoutParams as? androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams
+//                params?.behavior = null
+//                contentLayout?.requestLayout()
+//                // Làm cho nội dung vẽ full screen
+//                val window = context.window
+//                window.statusBarColor = android.graphics.Color.TRANSPARENT
+//
+//                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+//
+//                // Xóa padding của main container
+//                val mainContainer = context.findViewById<android.view.View>(R.id.main)
+//                mainContainer?.setPadding(0, 0, 0, mainContainer.paddingBottom)
+//
+//                // Chờ layout recalculate
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//                webView.postDelayed({
+//                    val js = """
+//                    if (window.onViewportExpanded) {
+//                        window.onViewportExpanded(${webView.height}, ${webView.width});
+//                    }
+//                """
+//                    webView.evaluateJavascript(js, null)
+//                }, 200)
+//            }
+//        }
+//    }
+//    // Cloud Storage using SharedPreferences
+//    @JavascriptInterface
+//    fun cloudStorageSetItem(key: String, value: String) {
+//        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
+//        prefs.edit().putString(key, value).apply()
+//    }
+//
+//    @JavascriptInterface
+//    fun cloudStorageGetItem(key: String): String {
+//        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
+//        return prefs.getString(key, "") ?: ""
+//    }
+//
+//    @JavascriptInterface
+//    fun cloudStorageRemoveItem(key: String) {
+//        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
+//        prefs.edit().remove(key).apply()
+//    }
+//
+//    @JavascriptInterface
+//    fun cloudStorageGetKeys(): String {
+//        val prefs = context.getSharedPreferences("TelegramCloudStorage", Context.MODE_PRIVATE)
+//        val keys = prefs.all.keys.toList()
+//        return org.json.JSONArray(keys).toString()
+//    }
+//    @JavascriptInterface
+//    fun biometricInit(): String {
+//        val biometricManager = BiometricManager.from(context)
+//        val canAuthenticate = biometricManager.canAuthenticate(
+//            BiometricManager.Authenticators.BIOMETRIC_STRONG or
+//                    BiometricManager.Authenticators.BIOMETRIC_WEAK
+//        )
+//
+//        val available = canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS
+//        val type = when {
+//            canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS -> "finger"
+//            else -> ""
+//        }
+//
+//        return """{"available":$available,"type":"$type","access_requested":true,"access_granted":$available}"""
+//    }
+//    @JavascriptInterface
+//    fun biometricAuthenticate(reason: String) {
+//        if (context is FragmentActivity) {
+//            context.runOnUiThread {
+//                val executor = ContextCompat.getMainExecutor(context)
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//
+//                val callback = object : BiometricPrompt.AuthenticationCallback() {
+//                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+//                        val token = "biometric_token_" + System.currentTimeMillis()
+//                        webView.evaluateJavascript(
+//                            "if(window.onBiometricResult) { window.onBiometricResult(true, '$token'); }",
+//                            null
+//                        )
+//                    }
+//
+//                    override fun onAuthenticationFailed() {
+//                        webView.evaluateJavascript(
+//                            "if(window.onBiometricResult) { window.onBiometricResult(false, ''); }",
+//                            null
+//                        )
+//                    }
+//
+//                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+//                        webView.evaluateJavascript(
+//                            "if(window.onBiometricResult) { window.onBiometricResult(false, ''); }",
+//                            null
+//                        )
+//                    }
+//                }
+//
+//                val biometricPrompt = BiometricPrompt(context, executor, callback)
+//
+//                val promptInfo = BiometricPrompt.PromptInfo.Builder()
+//                    .setTitle("Xác thực sinh trắc học")
+//                    .setSubtitle(reason)
+//                    .setNegativeButtonText("Hủy")
+//                    .build()
+//
+//                biometricPrompt.authenticate(promptInfo)
+//            }
+//        }
+//    }
+//    @JavascriptInterface
+//    fun biometricOpenSettings() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                try {
+//                    val intent = android.content.Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS)
+//                    context.startActivity(intent)
+//                } catch (e: Exception) {
+//                    Toast.makeText(context, "Không thể mở Settings", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        }
+//    }
+//    // --- Secondary Button ---
+//    @JavascriptInterface
+//    fun setSecondaryButtonText(text: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                // Lưu ý: Bạn cần thêm Button với id btnSecondary vào activity_main.xml hoặc layout tương ứng
+//                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
+//                btnSecondary?.text = text
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setSecondaryButtonVisible(isVisible: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
+//                btnSecondary?.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setSecondaryButtonColor(color: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
+//                try {
+//                    btnSecondary?.setBackgroundColor(android.graphics.Color.parseColor(color))
+//                } catch (e: Exception) { }
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setSecondaryButtonEnabled(enabled: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
+//                btnSecondary?.isEnabled = enabled
+//                btnSecondary?.alpha = if (enabled) 1.0f else 0.5f
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setSecondaryButtonProgress(isVisible: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val btnSecondary = context.findViewById<Button>(R.id.btnSecondary)
+//                if (isVisible) {
+//                    btnSecondary?.tag = btnSecondary?.text
+//                    btnSecondary?.text = "⏳..."
+//                    btnSecondary?.isEnabled = false
+//                } else {
+//                    val originalText = btnSecondary?.tag as? String
+//                    if (originalText != null) btnSecondary?.text = originalText
+//                    btnSecondary?.isEnabled = true
+//                }
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun setSecondaryButtonPosition(position: String) {
+//        // Có thể implement logic thay đổi vị trí button nếu cần
+//    }
+//
+//    // --- Swipe Behavior ---
+//    @JavascriptInterface
+//    fun setSwipeEnabled(enabled: Boolean) {
+//        if (context is MainActivity) {
+//            context.setSwipeEnabled(enabled)
+//        }
+//    }
+//
+//    // --- Invoice ---
+//    @JavascriptInterface
+//    fun openInvoice(slug: String) {
+//        if (context is MainActivity) {
+//            context.openInvoice(slug)
+//        }
+//    }
+//
+//    // --- Fullscreen ---
+//    @JavascriptInterface
+//    fun setFullscreen(fullscreen: Boolean) {
+//        if (context is MainActivity) {
+//            context.setFullscreen(fullscreen)
+//        }
+//    }
+//
+//    // --- Share ---
+//    @JavascriptInterface
+//    fun shareText(text: String) {
+//        val intent = android.content.Intent(android.content.Intent.ACTION_SEND)
+//        intent.type = "text/plain"
+//        intent.putExtra(android.content.Intent.EXTRA_TEXT, text)
+//        context.startActivity(android.content.Intent.createChooser(intent, "Share"))
+//    }
+//    // --- Request Write Access ---
+//    @JavascriptInterface
+//    fun requestWriteAccess() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                AlertDialog.Builder(context)
+//                    .setTitle("Yêu cầu quyền")
+//                    .setMessage("Bot muốn gửi tin nhắn cho bạn. Bạn có đồng ý không?")
+//                    .setPositiveButton("Đồng ý") { _, _ ->
+//                        // Gửi event về Mini App
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('write_access_requested', {detail: {status: 'allowed'}}));",
+//                            null
+//                        )
+//                    }
+//                    .setNegativeButton("Từ chối") { _, _ ->
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('write_access_requested', {detail: {status: 'declined'}}));",
+//                            null
+//                        )
+//                    }
+//                    .show()
+//            }
+//        }
+//    }
+//
+//    // --- Request Contact ---
+//    @JavascriptInterface
+//    fun requestContact() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                AlertDialog.Builder(context)
+//                    .setTitle("Chia sẻ số điện thoại")
+//                    .setMessage("Mini App muốn biết số điện thoại của bạn. Bạn có đồng ý chia sẻ không?")
+//                    .setPositiveButton("Đồng ý") { _, _ ->
+//                        // Gửi event với mock contact data
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        val contactJson = """{
+//                        "phone_number": "+84123456789",
+//                        "first_name": "User",
+//                        "last_name": "Test",
+//                        "user_id": 999999
+//                    }""".trimIndent().replace("\n", "")
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('phone_requested', {detail: {status: 'sent', contact: $contactJson}}));",
+//                            null
+//                        )
+//                    }
+//                    .setNegativeButton("Từ chối") { _, _ ->
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('phone_requested', {detail: {status: 'cancelled'}}));",
+//                            null
+//                        )
+//                    }
+//                    .show()
+//            }
+//        }
+//    }
+//    // --- Bottom Bar Color ---
+//    @JavascriptInterface
+//    fun setBottomBarColor(color: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                try {
+//                    val parsedColor = android.graphics.Color.parseColor(color)
+//                    // Set Navigation Bar Color
+//                    context.window.navigationBarColor = parsedColor
+//                    Toast.makeText(context, "Bottom Bar Color: $color", Toast.LENGTH_SHORT).show()
+//                } catch (e: Exception) {
+//                    Toast.makeText(context, "Invalid color: $color", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        }
+//    }
+//
+//    // --- Emoji Status ---
+//    @JavascriptInterface
+//    fun setEmojiStatus(emojiId: String, duration: Int) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                // In real Telegram, this would set the user's emoji status
+//                // For our mock, we just show a dialog and fake success
+//                AlertDialog.Builder(context)
+//                    .setTitle("Set Emoji Status")
+//                    .setMessage("Emoji ID: $emojiId\nDuration: ${duration}s\n\n(Tính năng này chỉ hoạt động trên Telegram thật)")
+//                    .setPositiveButton("OK") { _, _ ->
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('emoji_status_set', {detail: {success: true}}));",
+//                            null
+//                        )
+//                    }
+//                    .show()
+//            }
+//        }
+//    }
+//    // --- Add to Home Screen ---
+//    @JavascriptInterface
+//    fun addToHomeScreen() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                // Normally would use ShortcutManager for Android 7.1+
+//                // For demo, just show success
+//                AlertDialog.Builder(context)
+//                    .setTitle("Thêm vào Home Screen")
+//                    .setMessage("Tạo shortcut cho Mini App trên màn hình chính?")
+//                    .setPositiveButton("Thêm") { _, _ ->
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('home_screen_added', {detail: {status: 'added'}}));",
+//                            null
+//                        )
+//                        Toast.makeText(context, "Đã thêm vào Home Screen!", Toast.LENGTH_SHORT).show()
+//                    }
+//                    .setNegativeButton("Hủy", null)
+//                    .show()
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun checkHomeScreenStatus(): String {
+//        return """{"status":"unknown"}"""
+//    }
+//
+//    // --- Accelerometer ---
+//    private var accelerometerListener: android.hardware.SensorEventListener? = null
+//
+//    @JavascriptInterface
+//    fun startAccelerometer(refreshRate: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+//                val accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//
+//                accelerometerListener = object : android.hardware.SensorEventListener {
+//                    override fun onSensorChanged(event: android.hardware.SensorEvent) {
+//                        val x = event.values[0]
+//                        val y = event.values[1]
+//                        val z = event.values[2]
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('accelerometer_changed', {detail: {x: $x, y: $y, z: $z}}));",
+//                            null
+//                        )
+//                    }
+//                    override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
+//                }
+//                sensorManager.registerListener(accelerometerListener, accelerometer, android.hardware.SensorManager.SENSOR_DELAY_UI)
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun stopAccelerometer() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+//                accelerometerListener?.let { sensorManager.unregisterListener(it) }
+//            }
+//        }
+//    }
+//
+//    // --- Gyroscope ---
+//    private var gyroscopeListener: android.hardware.SensorEventListener? = null
+//
+//    @JavascriptInterface
+//    fun startGyroscope(refreshRate: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+//                val gyroscope = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_GYROSCOPE)
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//
+//                gyroscopeListener = object : android.hardware.SensorEventListener {
+//                    override fun onSensorChanged(event: android.hardware.SensorEvent) {
+//                        val x = event.values[0]
+//                        val y = event.values[1]
+//                        val z = event.values[2]
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('gyroscope_changed', {detail: {x: $x, y: $y, z: $z}}));",
+//                            null
+//                        )
+//                    }
+//                    override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
+//                }
+//                sensorManager.registerListener(gyroscopeListener, gyroscope, android.hardware.SensorManager.SENSOR_DELAY_UI)
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun stopGyroscope() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+//                gyroscopeListener?.let { sensorManager.unregisterListener(it) }
+//            }
+//        }
+//    }
+//    // --- Device Orientation ---
+//    private var orientationListener: android.hardware.SensorEventListener? = null
+//
+//    @JavascriptInterface
+//    fun startDeviceOrientation(refreshRate: String, needAbsolute: Boolean) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+//                val orientationSensor = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ROTATION_VECTOR)
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//
+//                orientationListener = object : android.hardware.SensorEventListener {
+//                    override fun onSensorChanged(event: android.hardware.SensorEvent) {
+//                        val rotationMatrix = FloatArray(9)
+//                        android.hardware.SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+//                        val orientation = FloatArray(3)
+//                        android.hardware.SensorManager.getOrientation(rotationMatrix, orientation)
+//
+//                        val alpha = Math.toDegrees(orientation[0].toDouble())
+//                        val beta = Math.toDegrees(orientation[1].toDouble())
+//                        val gamma = Math.toDegrees(orientation[2].toDouble())
+//
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('device_orientation_changed', {detail: {alpha: $alpha, beta: $beta, gamma: $gamma, absolute: $needAbsolute}}));",
+//                            null
+//                        )
+//                    }
+//                    override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
+//                }
+//                sensorManager.registerListener(orientationListener, orientationSensor, android.hardware.SensorManager.SENSOR_DELAY_UI)
+//            }
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun stopDeviceOrientation() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+//                orientationListener?.let { sensorManager.unregisterListener(it) }
+//            }
+//        }
+//    }
+//
+//    // --- Location Manager ---
+//    @JavascriptInterface
+//    fun openLocationSettings() {
+//        if (context is Activity) {
+//            val intent = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+//            context.startActivity(intent)
+//        }
+//    }
+//
+//    @JavascriptInterface
+//    fun getCurrentLocation() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//
+//                // Check permission first
+//                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+//                    != PackageManager.PERMISSION_GRANTED) {
+//                    // Request permission (you may need to handle this in MainActivity)
+//                    webView?.evaluateJavascript(
+//                        "window.dispatchEvent(new CustomEvent('location_error', {detail: {error: 'Location permission denied'}}));",
+//                        null
+//                    )
+//                    return@runOnUiThread
+//                }
+//
+//                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+//                val location = locationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+//                    ?: locationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
+//
+//                if (location != null) {
+//                    webView?.evaluateJavascript(
+//                        "window.dispatchEvent(new CustomEvent('location_received', {detail: {latitude: ${location.latitude}, longitude: ${location.longitude}, accuracy: ${location.accuracy}}}));",
+//                        null
+//                    )
+//                } else {
+//                    webView?.evaluateJavascript(
+//                        "window.dispatchEvent(new CustomEvent('location_error', {detail: {error: 'Could not get location'}}));",
+//                        null
+//                    )
+//                }
+//            }
+//        }
+//    }
+//    // --- Story Widget ---
+//    @JavascriptInterface
+//    fun shareStory(mediaUrl: String, text: String, widgetLinkUrl: String, widgetLinkName: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                // In a real Telegram client, this would open the Stories composer
+//                // For our demo, we'll show a dialog with the content
+//                val message = """
+//                Media URL: $mediaUrl
+//                Caption: $text
+//                Widget Link: $widgetLinkUrl
+//                Widget Name: $widgetLinkName
+//
+//                (Trong Telegram thật, nội dung này sẽ được mở trong Story Editor)
+//            """.trimIndent()
+//
+//                AlertDialog.Builder(context)
+//                    .setTitle("📖 Share to Story")
+//                    .setMessage(message)
+//                    .setPositiveButton("Chia sẻ") { _, _ ->
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('story_shared', {detail: {success: true}}));",
+//                            null
+//                        )
+//                        Toast.makeText(context, "Đã chia sẻ lên Story!", Toast.LENGTH_SHORT).show()
+//                    }
+//                    .setNegativeButton("Hủy") { _, _ ->
+//                        val webView = context.findViewById<WebView>(R.id.webView)
+//                        webView?.evaluateJavascript(
+//                            "window.dispatchEvent(new CustomEvent('story_shared', {detail: {success: false}}));",
+//                            null
+//                        )
+//                    }
+//                    .show()
+//            }
+//        }
+//    }
+//    // --- Download File ---
+//    @JavascriptInterface
+//    fun downloadFile(url: String, fileName: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                try {
+//                    val webView = context.findViewById<WebView>(R.id.webView)
+//
+//                    // Notify Mini App that download started
+//                    webView?.evaluateJavascript(
+//                        "window.dispatchEvent(new CustomEvent('file_download_started', {detail: {url: '$url', file_name: '$fileName'}}));",
+//                        null
+//                    )
+//
+//                    // Use DownloadManager
+//                    val request = android.app.DownloadManager.Request(android.net.Uri.parse(url))
+//                    request.setTitle(fileName)
+//                    request.setDescription("Downloading from Mini App...")
+//                    request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+//                    request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, fileName)
+//
+//                    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as android.app.DownloadManager
+//                    downloadManager.enqueue(request)
+//
+//                    Toast.makeText(context, "Đang tải: $fileName", Toast.LENGTH_SHORT).show()
+//
+//                } catch (e: Exception) {
+//                    val webView = context.findViewById<WebView>(R.id.webView)
+//                    webView?.evaluateJavascript(
+//                        "window.dispatchEvent(new CustomEvent('file_download_error', {detail: {error: '${e.message}'}}));",
+//                        null
+//                    )
+//                    Toast.makeText(context, "Lỗi tải file: ${e.message}", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        }
+//    }
+//
+//    // --- Open Media Preview ---
+//    @JavascriptInterface
+//    fun openMediaPreview(url: String, type: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                try {
+//                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+//                    intent.setDataAndType(
+//                        android.net.Uri.parse(url),
+//                        if (type == "video") "video/*" else "image/*"
+//                    )
+//                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    context.startActivity(intent)
+//                } catch (e: Exception) {
+//                    // Fallback: Open in browser
+//                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+//                    context.startActivity(intent)
+//                }
+//            }
+//        }
+//    }
+//    // --- Read Text From Clipboard ---
+//    @JavascriptInterface
+//    fun readTextFromClipboard() {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+//                val webView = context.findViewById<WebView>(R.id.webView)
+//
+//                val clipData = clipboard.primaryClip
+//                if (clipData != null && clipData.itemCount > 0) {
+//                    val text = clipData.getItemAt(0).text?.toString() ?: ""
+//                    webView?.evaluateJavascript(
+//                        "window.dispatchEvent(new CustomEvent('clipboard_text_received', {detail: {data: '$text'}}));",
+//                        null
+//                    )
+//                } else {
+//                    webView?.evaluateJavascript(
+//                        "window.dispatchEvent(new CustomEvent('clipboard_text_received', {detail: {data: null, error: 'Clipboard is empty'}}));",
+//                        null
+//                    )
+//                }
+//            }
+//        }
+//    }
+//
+//    // --- Send Data (to Bot) ---
+//    @JavascriptInterface
+//    fun sendData(data: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                // In real Telegram, this sends data to bot and closes the Mini App
+//                // For our demo, we show a dialog
+//                AlertDialog.Builder(context)
+//                    .setTitle("📤 Send Data to Bot")
+//                    .setMessage("Data: $data\n\n(Trong Telegram thật, Mini App sẽ đóng và data được gửi tới bot)")
+//                    .setPositiveButton("Gửi & Đóng") { _, _ ->
+//                        Toast.makeText(context, "Đã gửi data tới Bot!", Toast.LENGTH_SHORT).show()
+//                        // Close the Mini App (simulating Telegram behavior)
+//                        context.finish()
+//                    }
+//                    .setNegativeButton("Hủy", null)
+//                    .show()
+//            }
+//        }
+//    }
+//    // --- Switch Inline Query ---
+//    @JavascriptInterface
+//    fun switchInlineQuery(query: String, chatTypesJson: String) {
+//        if (context is Activity) {
+//            context.runOnUiThread {
+//                // In real Telegram, this switches to another chat and inserts @bot query
+//                // For our demo, we show a dialog
+//                AlertDialog.Builder(context)
+//                    .setTitle("🔍 Switch Inline Query")
+//                    .setMessage("Query: @bot $query\nChat Types: $chatTypesJson\n\n(Trong Telegram thật, sẽ mở chat picker và chèn inline query)")
+//                    .setPositiveButton("OK") { _, _ ->
+//                        Toast.makeText(context, "Inline query: $query", Toast.LENGTH_SHORT).show()
+//                    }
+//                    .show()
+//            }
+//        }
+//    }
