@@ -572,9 +572,48 @@ class MainActivity : AppCompatActivity() {
 class WebAppInterface(private val context: Context) {
     @JavascriptInterface
     fun postEvent(eventType: String, eventData: String?) {
-        Toast.makeText(context, "Hello", Toast.LENGTH_SHORT).show()
+        when (eventType) {
+            "web_app_setup_main_button" -> {
+                val data = org.json.JSONObject(eventData ?: "{}")
+
+                if (context is Activity) {
+                    context.runOnUiThread {
+                        val btnMain = context.findViewById<Button>(R.id.btnMain)
+                        if (data.has("is_visible")) {
+                            btnMain.visibility = if (data.getBoolean("is_visible"))
+                                android.view.View.VISIBLE
+                            else
+                                android.view.View.GONE
+                        }
+                        if (data.has("text")) {
+                            btnMain.text = data.getString("text")
+                        }
+                        if (data.has("is_active")) {
+                            btnMain.isEnabled = data.getBoolean("is_active")
+                            btnMain.alpha = if (data.getBoolean("is_active")) 1.0f else 0.5f
+                        }
+                        if (data.has("color")) {
+                                val color = android.graphics.Color.parseColor(data.getString("color"))
+                                btnMain.setBackgroundColor(color)
+                            }
+                        if (data.has("is_progress_visible")){
+                          val is_progress_visible = data.getBoolean("is_progress_visible")
+                            if (is_progress_visible){
+                                btnMain.text = "Đang tải"
+                                btnMain.isEnabled = false
+                                btnMain.visibility = android.view.View.VISIBLE
+                            }else{
+                                btnMain.text = "Main Button"
+                                btnMain.isEnabled = true
+                            }
+                        }
+                        }
+                    }
+                }
+            }
+        }
     }
-    }
+
 //
 //    @JavascriptInterface
 //    fun vibrate() {
